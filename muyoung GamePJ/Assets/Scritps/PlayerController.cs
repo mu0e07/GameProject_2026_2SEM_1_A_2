@@ -1,6 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum PlayerState
+{
+    Normal,
+
+    Pickup,
+}
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private Animator animator;
@@ -18,6 +24,8 @@ public class PlayerController : MonoBehaviour
 
     private float verticalVelocity;
 
+    private PlayerState currentState = PlayerState.Normal;
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -31,7 +39,16 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        Vector2 input = Vector2.zero;
+        ApplyGravity();
+
+        if (currentState != PlayerState.Normal) return;
+
+        HandleMovement(keyboard);
+    }
+
+    private void HandleMovement(Keyboard keyboard)
+    {
+    Vector2 input = Vector2.zero;
 
         if (keyboard.aKey.isPressed)
             input.x -= 1f;
@@ -85,5 +102,29 @@ public class PlayerController : MonoBehaviour
             animationSpeed = isRunning ? 1f : 0.5f;
         }
         animator.SetFloat("speed", animationSpeed, 0.1f, Time.deltaTime);
+    }
+    private void ApplyGravity()
+    {
+        if (controller.isGrounded && verticalVelocity < 0f)
+        {
+            verticalVelocity = -2f;
+        }
+        else
+        {
+            verticalVelocity += gravity * Time.deltaTime;
+        }
+
+        controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
+    }
+    public void ChangeState(PlayerState newState)
+    {
+        currentState = newState;
+
+        if (currentState != PlayerState.Normal)
+        {
+            animator.SetFloat("speed", 0);
+        }
+
+        Debug.Log("현재 상태 : " + currentState);
     }
 }

@@ -4,4 +4,5 @@ public class InventoryItem : MonoBehaviour
 {
     public string itemName;
     public int amount;
+    public string description;
 }
